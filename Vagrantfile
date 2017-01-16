@@ -9,8 +9,8 @@ Vagrant.configure("2") do |config|
 	config.vm.box = "bertvv/centos72"
 	config.vm.provider "virtualbox" do |vb|
 		vb.gui = true
-		vb.customize ['modifyvm', :id, '--cableconnected1', 'on'] 
-    end
+		vb.customize ['modifyvm', :id, '--cableconnected1', 'on']
+	end
 	
 	config.vm.define "server1" do |server1|
 		server1.vm.hostname = "server1"
