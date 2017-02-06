@@ -1,2 +1,0 @@
-Hello gradle
-buildVersion: '1.0.0'
