@@ -1,5 +1,4 @@
 apply plugin: 'war'
-apply plugin: 'java'
 
 repositories {
 	mavenCentral()
@@ -26,4 +25,4 @@ task greet (dependsOn: updVersion) {
 	def file = new File("build/main/resources/greeting.txt")
 	file.write("Hello gradle\nbuildVersion: '$currentVersion'")
 }
-build.mustRunAfter updVersion
+updVersion.mustRunAfter build
