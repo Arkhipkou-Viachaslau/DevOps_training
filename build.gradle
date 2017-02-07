@@ -22,7 +22,7 @@ task updVersion {
 	}
 }
 task greet (dependsOn: updVersion) {
-	def file = new File("build/main/resources/greeting.txt")
+	def file = new File("src/main/resources/greeting.txt")
 	file.write("Hello gradle\nbuildVersion: '$currentVersion'")
 }
 updVersion.mustRunAfter build
