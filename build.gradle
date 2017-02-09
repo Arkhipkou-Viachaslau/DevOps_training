@@ -1,0 +1,34 @@
+apply plugin: 'war'
+
+repositories {
+	mavenCentral()
+}
+	dependencies {
+	compile group: 'log4j', name: 'log4j', version: '1.2.17'
+	compile group: 'commons-io', name: 'commons-io', version: '2.5'
+}
+war {
+	archiveName = 'task3.war'
+}
+ext{
+	currentVersion = "$majorVersion"+'.'+"$minorVersion"
+}
+
+task updVersion {
+	doLast {
+		Properties props = new Properties()
+		File propsFile = new File('gradle.properties')
+		props.load(propsFile.newDataInputStream())
+		minorVersion = props['minorVersion'].toInteger()+1
+		props['minorVersion'] = minorVersion.toString()
+		props.store(propsFile.newWriter(), null)
+		}
+}
+
+task greet {
+	doLast {
+		def file = new File("build/resources/main/greeting.txt")
+		file.write("Hello gradle\nbuildVersion: '$currentVersion'")
+	}
+}
+war.dependsOn greet
