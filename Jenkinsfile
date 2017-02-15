@@ -16,8 +16,7 @@ node('master') {
 		}
 	}
 
-	sh '''cd /var/lib/jenkins/workspace/task4
-	cat build/resources/main/greeting.txt | grep -o "[0-9.]" | tr -d "\t\n" > currentVersion'''
+	sh "cat build/resources/main/greeting.txt | grep -o "[0-9.]" | tr -d "\t\n" > currentVersion"
 	currentVersion = readFile('currentVersion')
 
 	stage('nexuspush') {
@@ -27,7 +26,6 @@ node('master') {
 	}
 
 	stage('nexus_to_registry') {
-		sh "cd /var/lib/jenkins/workspace/task4"
 		sh "sudo docker build --build-arg contversion=${currentVersion} -t localhost:5000/task4:${currentVersion} ."
 		sleep 13
 		sh "sudo docker push localhost:5000/task4:${currentVersion}"
