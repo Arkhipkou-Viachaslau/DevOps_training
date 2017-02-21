@@ -4,4 +4,4 @@ DEPENDENCIES
     metadata: true
 
 GRAPH
-  install_docker (0.1.0)
+  install_docker (0.1.3)
