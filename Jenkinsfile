@@ -16,7 +16,7 @@ node('master') {
 		}
 	}
 
-	sh "cat build/resources/main/greeting.txt | grep -o "[0-9.]" | tr -d "\t\n" > currentVersion"
+	sh '''cat build/resources/main/greeting.txt | grep -o "[0-9.]" | tr -d "\t\n" > currentVersion'''
 	currentVersion = readFile('currentVersion')
 
 	stage('nexuspush') {
