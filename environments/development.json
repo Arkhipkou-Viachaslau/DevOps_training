@@ -8,7 +8,7 @@
     "override_attributes": {
     },
     "cookbook_versions": {
-        "docker_install": "= 0.1.5"
+        "docker_install": "= 0.1.5",
 	"run_container": "<= 0.1.5"
     }
 }
