@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.10">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@1.5.2">
+          <name>ENV</name>
+          <description></description>
+          <randomName>choice-parameter-7540021868577</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.27">
+              <script>return &quot;knife environment list&quot;.execute().text.tokenize()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.27">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>task7</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@1.5.2">
+          <name>Role</name>
+          <description></description>
+          <randomName>choice-parameter-7765225654966</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.27">
+              <script>return &quot;knife role list&quot;.execute().text.tokenize()</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.27">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>task7</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+        </org.biouno.unochoice.ChoiceParameter>
+        <com.seitenbau.jenkins.plugins.dynamicparameter.StringParameterDefinition plugin="dynamicparameter@0.2.0">
+          <name>cookbook_version</name>
+          <description></description>
+          <__uuid>0b0a2268-fa64-4ff4-ada3-d3380110664e</__uuid>
+          <__remote>false</__remote>
+          <__script>return &quot;0.1.5&quot;</__script>
+          <__localBaseDirectory serialization="custom">
+            <hudson.FilePath>
+              <default>
+                <remote>/var/lib/jenkins/dynamic_parameter/classpath</remote>
+              </default>
+              <boolean>true</boolean>
+            </hudson.FilePath>
+          </__localBaseDirectory>
+          <__remoteBaseDirectory>dynamic_parameter_classpath</__remoteBaseDirectory>
+          <__classPath></__classPath>
+          <readonlyInputField>false</readonlyInputField>
+        </com.seitenbau.jenkins.plugins.dynamicparameter.StringParameterDefinition>
+        <com.seitenbau.jenkins.plugins.dynamicparameter.StringParameterDefinition plugin="dynamicparameter@0.2.0">
+          <name>container_version</name>
+          <description></description>
+          <__uuid>db94d82a-a5b0-4818-b570-2f3658d6f70c</__uuid>
+          <__remote>false</__remote>
+          <__script>return &quot;1.0.6&quot;</__script>
+          <__localBaseDirectory serialization="custom">
+            <hudson.FilePath>
+              <default>
+                <remote>/var/lib/jenkins/dynamic_parameter/classpath</remote>
+              </default>
+              <boolean>true</boolean>
+            </hudson.FilePath>
+          </__localBaseDirectory>
+          <__remoteBaseDirectory>dynamic_parameter_classpath</__remoteBaseDirectory>
+          <__classPath></__classPath>
+          <readonlyInputField>false</readonlyInputField>
+        </com.seitenbau.jenkins.plugins.dynamicparameter.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers/>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.29">
+    <script>def currentVersion = &apos;currentVersion&apos;
+
+node(&apos;master&apos;) {
+
+	stage(&apos;git clone&apos;) {
+		git branch: &apos;task7&apos;, credentialsId: &apos;git&apos;, url: &apos;https://github.com/Arkhipkou-Viachaslau/devops_training.git&apos;
+	}
+
+    stage(&apos;upd_files&apos;) {
+        sh &apos;&apos;&apos;sudo sed -i &quot;s/.run_container.*/\\&quot;run_container\\&quot;: \\&quot;&lt;= ${cookbook_version}\\&quot;/g&quot; environments/development.json&apos;&apos;&apos;
+        sh &apos;&apos;&apos;sudo sed -i &quot;s/node.default\\[&apos;task7&apos;]\\[&apos;version&apos;].*/node.default[&apos;task7&apos;][&apos;version&apos;] = &apos;${container_version}&apos;/g&quot; cookbooks/run_container/attributes/default.rb&apos;&apos;&apos;
+        sh &apos;&apos;&apos;sudo sed -i &quot;s/version.*/version &apos;${cookbook_version}&apos;/g&quot; cookbooks/run_container/metadata.rb&apos;&apos;&apos;
+        sh &apos;knife environment from file environments/development.json&apos;
+        sh &apos;cd cookbooks/run_container &amp;&amp; sudo berks install &amp;&amp; sudo berks upload&apos;        
+    }
+
+	stage(&apos;gitpush&apos;) {
+		withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;git&apos;, usernameVariable: &apos;USERNAME&apos;, passwordVariable: &apos;PASSWORD&apos;]]) {
+			sh &apos;&apos;&apos;git commit -a -m &quot;task7&quot;
+			git push https://${USERNAME}:${PASSWORD}@github.com/Arkhipkou-Viachaslau/devops_training.git task7&apos;&apos;&apos;
+		}
+	}
+    stage(&apos;run_container&apos;) {
+        withCredentials([usernamePassword(credentialsId: &apos;493a2582-fad9-41e4-83e5-e149d13f656d&apos;, usernameVariable: &apos;USERNAME&apos;, passwordVariable: &apos;PASSWORD&apos;)]) {
+            sh &apos;knife ssh &quot;chef_environment:${ENV} AND role:${Role}&quot; &quot;sudo chef-client&quot; -x ${USERNAME} -P ${PASSWORD}&apos;
+        }
+    }
+}</script>
+    <sandbox>false</sandbox>
+  </definition>
+  <triggers/>
+</flow-definition>
