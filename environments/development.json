@@ -1,0 +1,14 @@
+{
+    "name": "development",
+    "description": "development",
+    "chef_type": "environment",
+    "json_class": "Chef::Environment",
+    "default_attributes": {
+    },
+    "override_attributes": {
+    },
+    "cookbook_versions": {
+        "docker_install": "= 0.1.5"
+		"run_container": ">= 0.1.5"
+    }
+}

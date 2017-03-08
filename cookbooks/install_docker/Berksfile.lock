@@ -1,0 +1,7 @@
+DEPENDENCIES
+  install_docker
+    path: .
+    metadata: true
+
+GRAPH
+  install_docker (0.1.3)
